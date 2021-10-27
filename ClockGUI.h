@@ -6,6 +6,7 @@
 
 #include <ctime>
 #include <iostream>
+#include <string>
 
 #include "Animator.h"
 #include "Image.h"
@@ -36,7 +37,7 @@ class ClockGUI {
         secondsHandAni->mode = mode;
         hoursHandAni = new Animator(0, size, 1000 / FRAME);
         hoursHandAni->mode = mode;
-        handsRoundAni = new Animator(M_PI * 4, 0, 1500 / FRAME);
+        handsRoundAni = new Animator(M_PI * 4, 0, 2000 / FRAME);
         handsRoundAni->mode = mode;
         secondsHandBendAni = new Animator(2 * M_PI / 60.0, 0, 15);
         secondsHandBendAni->mode = A_BEGIN_V0;
@@ -47,9 +48,8 @@ class ClockGUI {
         backColorAni = new Animator(200.0, 255.0, 100);
         scaleAni = new Animator(0.0, 25.0, 100);
         for (int i = 0; i < 12; i++) {
-            cout << "images/" + to_string(i + 1) + ".png" << endl;
-            numPics[i] = new Image("images/" + to_string(i + 1) + ".png");
-            numsRotateAni[i] = new Animator(0.0, (M_PI / 2) + (M_PI * 2 * (i + 1) / 12), 500);
+            numPics[i] = new Image(("images/" + to_string(i + 1) + ".png"));
+            numsRotateAni[i] = new Animator((M_PI / 2.0) * -1.0, (M_PI * 2 * (i + 1) / 12) - (M_PI / 2), 2000 / FRAME);
             numsRotateAni[i]->mode = mode;
         }
     }
@@ -66,7 +66,14 @@ class ClockGUI {
             drawSecondsHand();
             drawHoursHand();
         }
-        numPics[3]->putSprite(m_wm->px(0), m_wm->py(0), 3.0, M_PI / 3);
+
+        /* if (numsRotateAni[0]->played && !numRounded) {
+            numRounded = true;
+            for (int i = 0; i < 12; i++) {
+                delete numsRotateAni[i];
+                numsRotateAni[i] = new Animator()
+            }
+        } */
     }
 
    private:
@@ -90,6 +97,7 @@ class ClockGUI {
     double hoursBuf = 0.0;
     double minutesBuf = 0.0;
     Image* numPics[12];
+    bool numRounded = false;
 
     void updateTime() {
         time(&tt);
@@ -99,7 +107,7 @@ class ClockGUI {
     void drawNums() {
         for (int i = 0; i < 12; i++) {
             double ani = numsRotateAni[i]->play();
-            numPics[3]->putSprite(m_wm->px(size * 0.8 * cos(ani)), m_wm->py(size * 0.8 * sin(ani)), 0.8, ani + M_PI / 2);
+            numPics[i]->putSprite(m_wm->px(size * 0.8 * cos(ani)), m_wm->py(size * 0.8 * sin(ani)), 0.8, ani + M_PI / 2);
         }
     }
 

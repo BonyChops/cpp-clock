@@ -15,7 +15,9 @@ class Image {
     GLuint img;
     pngInfo info;
     Image(string filename) {
+            cout << filename << endl;
         img = pngBind(filename.c_str(), PNG_NOMIPMAP, PNG_ALPHA, &info, GL_CLAMP, GL_NEAREST, GL_NEAREST);
+        cout << "IMG NUM is: " << img << endl;
     }
 
     void putSprite(int x, int y) {
@@ -33,7 +35,7 @@ class Image {
 
         glPushMatrix();
         glEnable(GL_TEXTURE_2D);
-        glBindTexture(GL_TEXTURE, img);
+        glBindTexture(GL_TEXTURE_2D, img);
         glColor4ub(255, 255, 255, 255);
 
         glBegin(GL_QUADS);
