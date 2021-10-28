@@ -22,6 +22,8 @@ class ClockGUI {
     double size = 200.0;
     double x = 0.0;
     double y = 0.0;
+    Animator* backAni;
+
     ClockGUI(WindowManager* wm) {
         m_wm = wm;
     }
@@ -54,6 +56,7 @@ class ClockGUI {
         }
     }
     void draw() {
+        m_wm->drawMode = CENTER;
         updateTime();
         drawBackCircle();
         if (backAni->played) {
@@ -81,7 +84,6 @@ class ClockGUI {
     WindowManager* m_wm;
     time_t tt;
     struct tm* ts;
-    Animator* backAni;
     Animator* minutesHandAni;
     Animator* secondsHandAni;
     Animator* hoursHandAni;
@@ -167,11 +169,11 @@ class ClockGUI {
     }
 
     void drawHoursHand() {
-        if (hoursBuf != (double)ts->tm_hour) {
+        /* if (hoursBuf != (double)ts->tm_hour) {
             hoursHandBendAni->reset();
             hoursBuf = (double)ts->tm_hour;
-        }
-        drawHand(200.0, 0, 0, 0, hoursHandAni, 0.4, (double)ts->tm_hour /*  + (((double)ts->tm_min + ((double)ts->tm_sec / 60.0)) / 60.0) */, 12.0, hoursHandBendAni);
+        } */
+        drawHand(200.0, 0, 0, 0, hoursHandAni, 0.4, (double)ts->tm_hour  + (((double)ts->tm_min + ((double)ts->tm_sec / 60.0)) / 60.0), 12.0, hoursHandBendAni);
     }
 
     void drawHand(double width, int r, int g, int b, Animator* an, double per, double time, double timePer) {
