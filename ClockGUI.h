@@ -9,11 +9,13 @@
 #include <string>
 
 #include "Animator.h"
+#include "Block.h"
 #include "Image.h"
 #include "WindowManager.h"
 
 #define CIRCLE_ACCURATE 1000
 #define LINE_ACCURATE 1000
+#define BLOCKS 10
 
 using namespace std;
 
@@ -23,6 +25,8 @@ class ClockGUI {
     double x = 0.0;
     double y = 0.0;
     Animator* backAni;
+    bool generateBlocks = false;
+    Block* blocks[BLOCKS * 3];
 
     ClockGUI(WindowManager* wm) {
         m_wm = wm;
@@ -77,6 +81,17 @@ class ClockGUI {
                 numsRotateAni[i] = new Animator()
             }
         } */
+        generateBlocks = false;
+        blockIndex = 0;
+        //glBegin(GL_POINTS);
+        //m_wm->drawLine(m_wm->px(0.0), m_wm->py(0.0), m_wm->px(100.0 * cos(testRound)), m_wm->py(100.0 * sin(testRound)));
+        //cout << testRound << endl;
+        //glEnd();
+        testRound += 0.01;
+        if(testRound > 2 * M_PI){
+            testRound = 0.0;
+        }
+
     }
 
    private:
@@ -100,6 +115,8 @@ class ClockGUI {
     double minutesBuf = 0.0;
     Image* numPics[12];
     bool numRounded = false;
+    double testRound = 0.0;
+    int blockIndex = 0;
 
     void updateTime() {
         time(&tt);
@@ -109,7 +126,7 @@ class ClockGUI {
     void drawNums() {
         for (int i = 0; i < 12; i++) {
             double ani = numsRotateAni[i]->play();
-            numPics[i]->putSprite(m_wm->px(size * 0.8 * cos(ani)), m_wm->py(size * 0.8 * sin(ani)), 0.8, ani + M_PI / 2);
+            numPics[i]->putSprite(m_wm->px(size * 0.8 * cos(ani)), m_wm->py(size * 0.8 * sin(ani)), 0.8, 0.0/* ani + M_PI / 2 */);
         }
     }
 
@@ -173,7 +190,7 @@ class ClockGUI {
             hoursHandBendAni->reset();
             hoursBuf = (double)ts->tm_hour;
         } */
-        drawHand(200.0, 0, 0, 0, hoursHandAni, 0.4, (double)ts->tm_hour  + (((double)ts->tm_min + ((double)ts->tm_sec / 60.0)) / 60.0), 12.0, hoursHandBendAni);
+        drawHand(200.0, 0, 0, 0, hoursHandAni, 0.4, (double)ts->tm_hour + (((double)ts->tm_min + ((double)ts->tm_sec / 60.0)) / 60.0), 12.0, hoursHandBendAni);
     }
 
     void drawHand(double width, int r, int g, int b, Animator* an, double per, double time, double timePer) {
@@ -204,6 +221,15 @@ class ClockGUI {
             double bendVal = lineBending.play();
             glVertex2i(m_wm->px((ani * per * cos(bendVal + roundAniVal * (timePer == 12.0 ? 1 : -1) + (M_PI / 2.0) - (M_PI * 2.0 * time / timePer))) * i / LINE_ACCURATE),
                        m_wm->py((ani * per * sin(bendVal + roundAniVal * (timePer == 12.0 ? 1 : -1) + (M_PI / 2.0) - (M_PI * 2.0 * time / timePer)) * -1.0) * i / LINE_ACCURATE));
+        }
+        if (generateBlocks) {
+            for (int i = 0; i < BLOCKS; i++) {
+                blocks[blockIndex] = new Block(
+                    m_wm->px((ani * per * cos(roundAniVal * (timePer == 12.0 ? 1 : -1) + (M_PI / 2.0) - (M_PI * 2.0 * time / timePer))) * i / BLOCKS),
+                    m_wm->py((ani * per * sin(roundAniVal * (timePer == 12.0 ? 1 : -1) + (M_PI / 2.0) - (M_PI * 2.0 * time / timePer)) * -1.0) * i / BLOCKS),
+                    r, g, b);
+                blockIndex += 1;
+            }
         }
         glEnd();
     }
