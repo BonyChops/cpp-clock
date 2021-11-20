@@ -30,6 +30,10 @@ class DayCycle {
         return (int)(((double)end - (double)start) * ((double)x - (double)x1) / ((double)x2 - (double)x1) + (double)start);
     }
 
+    double calcD(double x, double start, double end, double x1, double x2) {
+        return ((end - start) * (x - x1) / (x2 - x1) + start);
+    }
+
     int getR() {
         updateTime();
         if (ds < (3600 * 12)) {

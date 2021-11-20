@@ -21,10 +21,10 @@ class DigitalClockGUI {
     DigitalClockGUI(WindowManager* wm) {
         m_wm = wm;
         for (int i = 0; i < 10; i++) {
-            numPics[i] = new Image(("images/" + to_string(i) + ".png"));
+            numPics[i] = new Image(("images/clock/" + to_string(i) + ".png"));
         }
-        colon = new Image("images/colon.png");
-        board = new Image("images/board.png");
+        colon = new Image("images/clock/colon.png");
+        board = new Image("images/clock/board.png");
         updateTime();
         hoursAni = new Animator(ts->tm_hour > 12 ? 0.0 : 24.0, (double)ts->tm_hour, 300);
         hoursAni->mode = A_END_V0;
@@ -35,7 +35,7 @@ class DigitalClockGUI {
         blinkAni = new Animator(0.0, 255, 100);
     }
 
-    void draw() {
+    virtual void draw() {
         m_y = (int)yAni->play();
         m_wm->drawMode = NORMAL;
         updateTime();

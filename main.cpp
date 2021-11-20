@@ -7,6 +7,7 @@
 #include "ClockGUI.h"
 #include "DayCycle.h"
 #include "DigitalClockGUI.h"
+#include "FutureGUI.h"
 #include "Game.h"
 #include "WindowManager.h"
 
@@ -14,6 +15,7 @@ using namespace std;
 
 WindowManager* windowManager;
 ClockGUI* clockgui;
+FutureGUI* futuregui;
 DigitalClockGUI* digitalClockGUI;
 Game* game;
 
@@ -26,6 +28,9 @@ Animator* backB;
 Block** blocks;
 
 bool playGame = false;
+
+int mode = 0;
+int clocks = 2;
 
 //MORNING(7:00)
 //rgb(0, 146, 255)
@@ -57,10 +62,19 @@ int main(int argc, char** argv) {
     glutTimerFunc(FRAME, Loop, 0);
     glutKeyboardFunc(Keyboard);
     glutSpecialFunc(Special);
-    clockgui = new ClockGUI(windowManager);
     digitalClockGUI = new DigitalClockGUI(windowManager);
-    clockgui->size = 200.0;
-    clockgui->init();
+    switch (mode) {
+        case 0:
+            clockgui = new ClockGUI(windowManager);
+            clockgui->size = 200.0;
+            clockgui->init();
+            break;
+        case 1:
+            futuregui = new FutureGUI(windowManager);
+            futuregui->size = 200.0;
+            futuregui->init();
+            break;
+    }
     dayCycle = new DayCycle();
     backR = new Animator(0, dayCycle->getR(), 500);
     backG = new Animator(0, dayCycle->getG(), 500);
@@ -106,6 +120,37 @@ void Special(int key, int x, int y) {
             case GLUT_KEY_RIGHT:
                 game->rightArrow();
         }
+    } else {
+        switch (key) {
+            case GLUT_KEY_LEFT:
+                mode -= 1;
+                if (mode < 0) {
+                    mode = clocks - 1;
+                }
+                break;
+            case GLUT_KEY_RIGHT:
+                mode += 1;
+                if (mode >= clocks) {
+                    mode = 0;
+                }
+                break;
+            default:
+                return;
+        }
+        switch (mode) {
+            case 0:
+                delete clockgui;
+                clockgui = new ClockGUI(windowManager);
+                clockgui->size = 200.0;
+                clockgui->init();
+                break;
+            case 1:
+                delete futuregui;
+                futuregui = new FutureGUI(windowManager);
+                futuregui->size = 200.0;
+                futuregui->init();
+                break;
+        }
     }
 }
 
@@ -114,14 +159,25 @@ void Loop(int value) {
         !backR->played ? backR->play() : dayCycle->getR(),
         !backG->played ? backG->play() : dayCycle->getG(),
         !backB->played ? backB->play() : dayCycle->getB());
-    clockgui->draw();
+    switch (mode) {
+        case 0:
+            clockgui->draw();
+            break;
+        case 1:
+            futuregui->draw();
+            break;
+    }
     if (playGame) {
         game->draw();
     }
-    if (clockgui->backAni->played) {
+    if ((mode == 0 ? clockgui : futuregui)->backAni->played) {
         digitalClockGUI->draw();
     }
+    /* if (clockgui->backAni->played) {
+        digitalClockGUI->draw();
+    } */
 
     glFlush();
+    glutSwapBuffers();
     glutTimerFunc(FRAME, Loop, 0);
 }

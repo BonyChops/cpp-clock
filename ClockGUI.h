@@ -32,7 +32,7 @@ class ClockGUI {
         m_wm = wm;
     }
 
-    void init() {
+    virtual void init() {
         updateTime();
         int mode = A_END_V0;
         backAni = new Animator(0, size, 1000 / FRAME);
@@ -54,12 +54,12 @@ class ClockGUI {
         backColorAni = new Animator(200.0, 255.0, 100);
         scaleAni = new Animator(0.0, 25.0, 100);
         for (int i = 0; i < 12; i++) {
-            numPics[i] = new Image(("images/" + to_string(i + 1) + ".png"));
+            numPics[i] = new Image(("images/clock/" + to_string(i + 1) + ".png"));
             numsRotateAni[i] = new Animator((M_PI / 2.0) * -1.0, (M_PI * 2 * (i + 1) / 12) - (M_PI / 2), 2000 / FRAME);
             numsRotateAni[i]->mode = mode;
         }
     }
-    void draw() {
+    virtual void draw() {
         m_wm->drawMode = CENTER;
         updateTime();
         drawBackCircle();
@@ -88,13 +88,12 @@ class ClockGUI {
         //cout << testRound << endl;
         //glEnd();
         testRound += 0.01;
-        if(testRound > 2 * M_PI){
+        if (testRound > 2 * M_PI) {
             testRound = 0.0;
         }
-
     }
 
-   private:
+   protected:
     double backSize = 0.0;
     WindowManager* m_wm;
     time_t tt;
@@ -118,22 +117,42 @@ class ClockGUI {
     double testRound = 0.0;
     int blockIndex = 0;
 
-    void updateTime() {
+    virtual void updateTime() {
         time(&tt);
         ts = localtime(&tt);
     }
 
-    void drawNums() {
+    virtual void drawNums() {
         for (int i = 0; i < 12; i++) {
             double ani = numsRotateAni[i]->play();
-            numPics[i]->putSprite(m_wm->px(size * 0.8 * cos(ani)), m_wm->py(size * 0.8 * sin(ani)), 0.8, 0.0/* ani + M_PI / 2 */);
+            numPics[i]->putSprite(m_wm->px(size * 0.8 * cos(ani)), m_wm->py(size * 0.8 * sin(ani)), 0.8, 0.0 /* ani + M_PI / 2 */);
         }
     }
 
-    void drawScale() {
+    virtual void drawScale() {
+        drawScale(0, 0, 0);
+    }
+
+    void drawBorder(int r, int g, int b, double startPoint, double progress) {
         glPointSize(2.0);
         glBegin(GL_POINTS);
-        glColor3ub(0.0, 0.0, 0.0);
+        glColor3ub(r, g, b);
+        for (int i = 0; i < CIRCLE_ACCURATE; i++) {
+            if((double)i * 100 / (double)CIRCLE_ACCURATE < startPoint){
+                continue;
+            }
+            if((double)i * 100 / (double)CIRCLE_ACCURATE > progress){
+                break;
+            }
+            glVertex2i(m_wm->px((int)((size - 0.2) * cos(2.0 * M_PI * i / CIRCLE_ACCURATE - M_PI / 2))), m_wm->py((int)(size * sin(2.0 * M_PI * i / CIRCLE_ACCURATE- M_PI / 2))));
+        }
+        glEnd();
+    }
+
+    void drawScale(int r, int g, int b) {
+        glPointSize(2.0);
+        glBegin(GL_POINTS);
+        glColor3ub(r, g, b);
         double ani = scaleAni->play();
         for (int i = 0; i < 12; i++) {
             m_wm->drawLine(
@@ -155,9 +174,13 @@ class ClockGUI {
         glEnd();
     }
 
-    void drawBackCircle() {
+    virtual void drawBackCircle() {
+        drawBackCircle(255, 255, 255);
+    }
+
+    virtual void drawBackCircle(int r, int g, int b) {
         glBegin(GL_POLYGON);
-        glColor3ub(/* (int)backColorAni->play() */ 255, 255, 255);
+        glColor3ub(/* (int)backColorAni->play() */ r, g, b);
         m_wm->drawMode = CENTER;
         double ani = backAni->play();
         for (int i = 0; i < CIRCLE_ACCURATE; i++) {
@@ -167,7 +190,7 @@ class ClockGUI {
         glEnd();
     }
 
-    void drawMinutesHand() {
+    virtual void drawMinutesHand() {
         if (minutesBuf != (double)ts->tm_min) {
             minutesHandBendAni->reset();
             minutesBuf = (double)ts->tm_min;
@@ -175,7 +198,7 @@ class ClockGUI {
         drawHand(100.0, 0, 0, 0, minutesHandAni, 0.75, (double)ts->tm_min /* + ((double)ts->tm_sec / 60.0) */, 60.0, minutesHandBendAni);
     }
 
-    void drawSecondsHand() {
+    virtual void drawSecondsHand() {
         double timePer = 60.0;
         if (secondsBuf != (double)ts->tm_sec) {
             secondsHandBendAni->reset();
@@ -185,7 +208,7 @@ class ClockGUI {
         drawHand(50.0, 200, 200, 0, secondsHandAni, 0.8, (double)ts->tm_sec, timePer, secondsHandBendAni);
     }
 
-    void drawHoursHand() {
+    virtual void drawHoursHand() {
         /* if (hoursBuf != (double)ts->tm_hour) {
             hoursHandBendAni->reset();
             hoursBuf = (double)ts->tm_hour;
@@ -193,11 +216,11 @@ class ClockGUI {
         drawHand(200.0, 0, 0, 0, hoursHandAni, 0.4, (double)ts->tm_hour + (((double)ts->tm_min + ((double)ts->tm_sec / 60.0)) / 60.0), 12.0, hoursHandBendAni);
     }
 
-    void drawHand(double width, int r, int g, int b, Animator* an, double per, double time, double timePer) {
+    virtual void drawHand(double width, int r, int g, int b, Animator* an, double per, double time, double timePer) {
         drawHand(width, r, g, b, an, per, time, timePer, nullptr);
     }
 
-    void drawHand(double width, int r, int g, int b, Animator* an, double per, double time, double timePer, Animator* bendAni) {
+    virtual void drawHand(double width, int r, int g, int b, Animator* an, double per, double time, double timePer, Animator* bendAni) {
         /* glLineWidth(width);
         glBegin(GL_LINES);
         glColor3ub(r, g, b);
