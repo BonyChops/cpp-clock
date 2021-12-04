@@ -1,0 +1,15 @@
+"filename", "language", "C++", "Shell Script", "comment", "blank", "total"
+"/home/bonychops/documents/cpp-clock/Animator.h", "C++", 76, 0, 0, 12, 88
+"/home/bonychops/documents/cpp-clock/Block.h", "C++", 54, 0, 0, 11, 65
+"/home/bonychops/documents/cpp-clock/ClockGUI.h", "C++", 212, 0, 26, 23, 261
+"/home/bonychops/documents/cpp-clock/DayCycle.h", "C++", 69, 0, 5, 11, 85
+"/home/bonychops/documents/cpp-clock/DigitalClockGUI.h", "C++", 100, 0, 1, 15, 116
+"/home/bonychops/documents/cpp-clock/FutureGUI.h", "C++", 135, 0, 29, 22, 186
+"/home/bonychops/documents/cpp-clock/Game.h", "C++", 178, 0, 4, 18, 200
+"/home/bonychops/documents/cpp-clock/Image.h", "C++", 68, 0, 0, 17, 85
+"/home/bonychops/documents/cpp-clock/WindowManager.cpp", "C++", 64, 0, 2, 17, 83
+"/home/bonychops/documents/cpp-clock/WindowManager.h", "C++", 53, 0, 2, 5, 60
+"/home/bonychops/documents/cpp-clock/main.cpp", "C++", 147, 0, 15, 21, 183
+"/home/bonychops/documents/cpp-clock/under12.sh", "Shell Script", 0, 4, 0, 0, 4
+"/home/bonychops/documents/cpp-clock/under9.sh", "Shell Script", 0, 11, 0, 1, 12
+"Total", "-", 1156, 15, 84, 173, 1428
