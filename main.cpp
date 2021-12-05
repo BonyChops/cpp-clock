@@ -1,7 +1,7 @@
 #include <GL/glut.h>
 #include <string.h>
 
-#define FRAME 5
+#define FRAME 20
 
 #include "Animator.h"
 #include "ClockGUI.h"
@@ -24,6 +24,8 @@ DayCycle* dayCycle;
 Animator* backR;
 Animator* backG;
 Animator* backB;
+
+bool isDigitalShowed = false;
 
 Block** blocks;
 
@@ -76,10 +78,16 @@ int main(int argc, char** argv) {
             break;
     }
     dayCycle = new DayCycle();
-    backR = new Animator(0, dayCycle->getR(), 500);
-    backG = new Animator(0, dayCycle->getG(), 500);
-    backB = new Animator(0, dayCycle->getB(), 500);
+    backR = new Animator(0, dayCycle->getR(), 100);
+    backG = new Animator(0, dayCycle->getG(), 100);
+    backB = new Animator(0, dayCycle->getB(), 100);
     DayCycle* a = new DayCycle();
+    char *GL_version = (char *)glGetString(GL_VERSION);
+    char *GL_vendor = (char *)glGetString(GL_VENDOR);
+    char *GL_renderer = (char *)glGetString(GL_RENDERER);
+    cout << GL_version << endl;
+    cout << GL_vendor << endl;
+    cout << GL_renderer << endl;
     windowManager->Start();
 
     //glutMainLoop();    return 0;
@@ -90,7 +98,7 @@ void Display(void) {
 }
 
 void Keyboard(unsigned char key, int x, int y) {
-    if (key == 'g') {
+    if (key == 'g' && mode == 0) {
         if (!playGame) {
             delete game;
             game = new Game(windowManager);
@@ -108,7 +116,7 @@ void Keyboard(unsigned char key, int x, int y) {
             game->space();
         }
     }
-    cout << key << endl;
+    //cout << key << endl;
 }
 
 void Special(int key, int x, int y) {
@@ -170,8 +178,9 @@ void Loop(int value) {
     if (playGame) {
         game->draw();
     }
-    if ((mode == 0 ? clockgui : futuregui)->backAni->played) {
+    if ((mode == 0 ? clockgui : futuregui)->backAni->played || isDigitalShowed) {
         digitalClockGUI->draw();
+        isDigitalShowed = true;
     }
     /* if (clockgui->backAni->played) {
         digitalClockGUI->draw();

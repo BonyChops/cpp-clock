@@ -24,12 +24,12 @@ void WindowManager::InitDisplay(int argc, char** argv) {
 }
 
 void WindowManager::Start() {
-    cout << "Let's go" << endl;
+    //cout << "Let's go" << endl;
     glutMainLoop();
 }
 
 void WindowManager::ReshapeHandler(int w, int h) {
-    cout << "ウィンドウの幅と高さ w:" << w << " h:" << h << endl;
+    //cout << "ウィンドウの幅と高さ w:" << w << " h:" << h << endl;
     glViewport(0, 0, w, h);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();

@@ -11,7 +11,7 @@ class DayCycle {
     DayCycle() {
         updateTime();
         for (int i = 3600 * 12; i < 3600 * 16; i++) {
-            cout << calc(i, 0, 253, 3600 * 12, 3600 * 17) << endl;
+            ////cout << calc(i, 0, 253, 3600 * 12, 3600 * 17) << endl;
         }
     }
 

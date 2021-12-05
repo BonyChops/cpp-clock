@@ -73,7 +73,7 @@ class FutureGUI : public ClockGUI {
             ostringstream oss;
             string biStr;
             if (!numsRotateAni[0]->played) {
-                if (frame[i] < 20) {
+                if (frame[i] < 7) {
                     frame[i] += 1;
                     biStr = bufferNum[i];
                 } else {
@@ -157,7 +157,7 @@ class FutureGUI : public ClockGUI {
         glColor3ub(r, g, b);
         glVertex2i(m_wm->px(0), m_wm->py(0));
         double ani = an->play();
-        cout << dayCycle.calcD(progress, 0.0, 100.0, 0, 50.0) << endl;
+        ////cout << dayCycle.calcD(progress, 0.0, 100.0, 0, 50.0) << endl;
         double startPos = progress < 50.0 ? dayCycle.calcD(progress, 0.0, 100.0, 0.0, 50.0) : 100.0;
         double endPos = progress >= 50.0 ? dayCycle.calcD(progress, 0.0, 100.0, 50.0, 100.0) : 0.0;
         m_wm->drawLine(

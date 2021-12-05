@@ -18,20 +18,20 @@ class Block {
         m_r = r;
         m_g = g;
         m_b = b;
-        sizeAni = new Animator(0.0, size, 100);
+        sizeAni = new Animator(0.0, size, 20);
         sizeAni->mode = A_BEGIN_V0;
     }
 
     void setAlive() {
         delete sizeAni;
-        sizeAni = new Animator(0.0, size, 100);
+        sizeAni = new Animator(0.0, size, 20);
         sizeAni->mode = A_BEGIN_V0;
         alive = true;
     }
 
     void setDead() {
         delete sizeAni;
-        sizeAni = new Animator(size, 0.0, 100);
+        sizeAni = new Animator(size, 0.0, 20);
         sizeAni->mode = A_BEGIN_V0;
         alive = false;
     }

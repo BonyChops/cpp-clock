@@ -16,7 +16,7 @@ class Game {
 
     Game(WindowManager* wm) {
         m_wm = wm;
-        backAni = new Animator(0.0, size, 100);
+        backAni = new Animator(0.0, size, 20);
         backAni->mode = A_END_V0;
         backRoutateAni = new Animator(0.0, M_PI * 2, 100);
         backRoutateAni->mode = A_END_V0;
@@ -43,7 +43,7 @@ class Game {
             if (gameStarted) {
                 checkWall();
             }
-            cout << angle << endl;
+            //cout << angle << endl;
         }
     }
 
@@ -75,8 +75,8 @@ class Game {
 
     void drawBall() {
         if (gameStarted) {
-            ball_x += cos(angle) * 2.0;
-            ball_y += sin(angle) * 2.0;
+            ball_x += cos(angle) * 5.0;
+            ball_y += sin(angle) * 5.0;
         }
         glBegin(GL_POINTS);
         glColor3ub(255.0, 0.0, 0.0);
@@ -87,12 +87,12 @@ class Game {
 
     void checkWall() {
         if (ball_x > squareActualSize) {
-            cout << "a" << endl;
+            //cout << "a" << endl;
             ballTurnLeft();
             ball_x -= 10;
         }
         if (ball_x < squareActualSize * -1) {
-            cout << "a" << endl;
+            //cout << "a" << endl;
             ballTurnRight();
             ball_x += 10;
         }
@@ -123,14 +123,14 @@ class Game {
             }
         }
         if(ball_y > bar_y - 5 && ball_y < bar_y + 5 && ball_x > bar_x - (barWidth / 2) && ball_x < bar_x + (barWidth / 2)){
-            cout << "HIT" << endl;
+            //cout << "HIT" << endl;
             angle > M_PI / 2 && angle < (M_PI * 3 / 2) ? ballTurnPlus() : ballTurnMinus();
             ball_y -= 10;
         }
     }
 
     void leftArrow() {
-        cout << abs(bar_x) + (barWidth / 2) + G_MOVE_PER << endl;
+        //cout << abs(bar_x) + (barWidth / 2) + G_MOVE_PER << endl;
         if (bar_x - (barWidth / 2) - G_MOVE_PER <= (int)squareActualSize * -1) {
             return;
         }
@@ -154,7 +154,7 @@ class Game {
         if (!gameStarted) {
             srand(time(NULL));
             angle = ((double)(rand() % (int)(M_PI * 10000)) / 2.0 / 10000.0) * -1.0 - (M_PI / 4);
-            cout << angle << endl;
+            //cout << angle << endl;
             gameStarted = true;
         }
     }
@@ -172,14 +172,14 @@ class Game {
         if (angle > M_PI * 2) {
             angle -= M_PI * 2;
         }
-        cout << angle << endl;
+        //cout << angle << endl;
     }
     void ballTurnMinus() {
         angle = (angle - ((double)(rand() % (int)(M_PI * 100)) / 100.0 / 4.0) - M_PI * 2.0 / 8.0);
         if (angle < 0) {
             angle += M_PI * 2;
         }
-        cout << angle << endl;
+        //cout << angle << endl;
     }
 
    private:

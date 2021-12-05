@@ -45,9 +45,9 @@ class ClockGUI {
         hoursHandAni->mode = mode;
         handsRoundAni = new Animator(M_PI * 4, 0, 2000 / FRAME);
         handsRoundAni->mode = mode;
-        secondsHandBendAni = new Animator(2 * M_PI / 60.0, 0, 15);
+        secondsHandBendAni = new Animator(2 * M_PI / 60.0, 0, 3);
         secondsHandBendAni->mode = A_BEGIN_V0;
-        minutesHandBendAni = new Animator(2 * M_PI / 60.0, 0, 30);
+        minutesHandBendAni = new Animator(2 * M_PI / 60.0, 0, 6);
         minutesHandBendAni->mode = A_BEGIN_V0;
         hoursHandBendAni = new Animator(2 * M_PI / 12.0, 0, 30);
         hoursHandBendAni->mode = A_BEGIN_V0;
@@ -85,7 +85,7 @@ class ClockGUI {
         blockIndex = 0;
         //glBegin(GL_POINTS);
         //m_wm->drawLine(m_wm->px(0.0), m_wm->py(0.0), m_wm->px(100.0 * cos(testRound)), m_wm->py(100.0 * sin(testRound)));
-        //cout << testRound << endl;
+        ////cout << testRound << endl;
         //glEnd();
         testRound += 0.01;
         if (testRound > 2 * M_PI) {

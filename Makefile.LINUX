@@ -1,0 +1,20 @@
+TARGET = j18314.exe
+SRCS = main.cpp WindowManager.cpp
+OBJS = ${SRCS:.cpp=.o}
+HEADERS=
+CC = g++
+CCFLAGS = -Wall -I/usr/include/opengl
+LD = g++
+LDFLAGS =
+LIBS = -lglpng -lglut -lGLU -lGL -lm
+
+$(TARGET) : $(OBJS)
+	$(LD) $(LDFLAGS) -o $(TARGET) $(OBJS) $(ICONOBJ) $(LIBS)
+
+.cpp.o:
+	$(CC) $(CCFLAGS) -c $<
+
+$(OBJS) : $(HEADERS) Makefile
+
+clean:
+	rm -f $(TARGET) $(OBJS) core

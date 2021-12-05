@@ -26,11 +26,11 @@ class DigitalClockGUI {
         colon = new Image("images/clock/colon.png");
         board = new Image("images/clock/board.png");
         updateTime();
-        hoursAni = new Animator(ts->tm_hour > 12 ? 0.0 : 24.0, (double)ts->tm_hour, 300);
+        hoursAni = new Animator(ts->tm_hour > 12 ? 0.0 : 24.0, (double)ts->tm_hour, 150);
         hoursAni->mode = A_END_V0;
-        minutesAni = new Animator(ts->tm_min > 30 ? 0.0 : 60.0, (double)ts->tm_min, 300);
+        minutesAni = new Animator(ts->tm_min > 30 ? 0.0 : 60.0, (double)ts->tm_min, 150);
         minutesAni->mode = A_END_V0;
-        yAni = new Animator(-50.0, m_y, 300);
+        yAni = new Animator(-50.0, m_y, 150);
         yAni->mode = A_END_V0;
         blinkAni = new Animator(0.0, 255, 100);
     }

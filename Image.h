@@ -15,9 +15,9 @@ class Image {
     GLuint img;
     pngInfo info;
     Image(string filename) {
-        cout << filename << endl;
+        ////cout << filename << endl;
         img = pngBind(filename.c_str(), PNG_NOMIPMAP, PNG_ALPHA, &info, GL_CLAMP, GL_NEAREST, GL_NEAREST);
-        cout << "IMG NUM is: " << img << endl;
+        ////cout << "IMG NUM is: " << img << endl;
     }
 
     void putSprite(int x, int y) {
