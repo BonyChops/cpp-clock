@@ -1,6 +1,6 @@
 #ifndef _WINDOW_MANAGER_H_
 #define _WINDOW_MANAGER_H_
-#include <GL/glpng.h>
+// #include <GL/glpng.h>
 #include <GL/glut.h>
 #include <math.h>
 
@@ -31,13 +31,18 @@ class WindowManager {
     int toReadPosX(int x);
     int toReadPosY(int y);
     void clearWithColor(int r, int g, int b) {
-        glBegin(GL_QUADS);
-        glColor3ub(r, g, b);
+        glColor3ub((GLubyte)r, (GLubyte)g, (GLubyte)b);
+
+        glBegin(GL_TRIANGLES);
         glVertex2i(0, 0);
         glVertex2i(m_windowW, 0);
         glVertex2i(m_windowW, m_windowH);
+
+        glVertex2i(0, 0);
+        glVertex2i(m_windowW, m_windowH);
         glVertex2i(0, m_windowH);
         glEnd();
+        
     }
     void drawLine(double x1, double y1, double x2, double y2) {
         int length = (int)sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));

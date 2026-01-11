@@ -1,6 +1,6 @@
 #ifndef _CLOCKGUI_H_
 #define _CLOCKGUI_H_
-#include <GL/glpng.h>
+// #include <GL/glpng.h>
 #include <GL/glut.h>
 #include <math.h>
 
@@ -134,34 +134,71 @@ class ClockGUI {
     }
 
     void drawBorder(int r, int g, int b, double startPoint, double progress) {
-        glPointSize(2.0);
-        glBegin(GL_POINTS);
-        glColor3ub(r, g, b);
-        for (int i = 0; i < CIRCLE_ACCURATE; i++) {
-            if((double)i * 100 / (double)CIRCLE_ACCURATE < startPoint){
-                continue;
-            }
-            if((double)i * 100 / (double)CIRCLE_ACCURATE > progress){
-                break;
-            }
-            glVertex2i(m_wm->px((int)((size - 0.2) * cos(2.0 * M_PI * i / CIRCLE_ACCURATE - M_PI / 2))), m_wm->py((int)(size * sin(2.0 * M_PI * i / CIRCLE_ACCURATE- M_PI / 2))));
+        const int N = (int)CIRCLE_ACCURATE;
+
+        glColor3ub((GLubyte)r, (GLubyte)g, (GLubyte)b);
+        glPointSize(2.0f); // ※WebGLでは効かない/上限がある場合あり
+
+        std::vector<float> v;
+        v.reserve(N * 2);
+
+        for (int i = 0; i < N; ++i) {
+            double p = (double)i * 100.0 / (double)N;
+            if (p < startPoint) continue;
+            if (p > progress) break;
+
+            double ang = 2.0 * M_PI * (double)i / (double)N - M_PI / 2.0;
+
+            // 元コードの int キャストはやめて、そのまま px/py へ（安定）
+            double x = (size - 0.2) * std::cos(ang);
+            double y = (size)       * std::sin(ang);
+
+            v.push_back((float)m_wm->px(x));
+            v.push_back((float)m_wm->py(y));
         }
-        glEnd();
+
+        if (v.empty()) return;
+
+        glEnableClientState(GL_VERTEX_ARRAY);
+        glVertexPointer(2, GL_FLOAT, 0, v.data());
+        glDrawArrays(GL_POINTS, 0, (GLsizei)(v.size() / 2));
+        glDisableClientState(GL_VERTEX_ARRAY);
     }
 
     void drawScale(int r, int g, int b) {
-        glPointSize(2.0);
-        glBegin(GL_POINTS);
-        glColor3ub(r, g, b);
+        const int N = 12;
+        m_wm->drawMode = CENTER;
+
         double ani = scaleAni->play();
-        for (int i = 0; i < 12; i++) {
-            m_wm->drawLine(
-                (double)m_wm->px((int)(size * cos(M_PI / 2.0 + (M_PI * 2.0 * (double)i / 12.0)))),
-                (double)m_wm->py((int)(size * sin(M_PI / 2.0 + (M_PI * 2.0 * (double)i / 12.0)))),
-                (double)m_wm->px((int)((size - ani) * cos(M_PI / 2.0 + (M_PI * 2.0 * (double)i / 12.0)))),
-                (double)m_wm->py((int)((size - ani) * sin(M_PI / 2.0 + (M_PI * 2.0 * (double)i / 12.0)))));
+
+        // 線分 N 本 → 頂点は 2N 個 → (x,y) で 4N 要素
+        std::vector<float> v;
+        v.reserve(N * 4);
+
+        for (int i = 0; i < N; ++i) {
+            double ang = M_PI / 2.0 + (2.0 * M_PI * (double)i / (double)N);
+
+            double x0 = size * std::cos(ang);
+            double y0 = size * std::sin(ang);
+            double x1 = (size - ani) * std::cos(ang);
+            double y1 = (size - ani) * std::sin(ang);
+
+            // ここは int キャストをやめて、px/py に double をそのまま渡すのが安定
+            v.push_back((float)m_wm->px(x0));
+            v.push_back((float)m_wm->py(y0));
+            v.push_back((float)m_wm->px(x1));
+            v.push_back((float)m_wm->py(y1));
         }
-        glEnd();
+
+        glColor3ub(r, g, b);
+
+        glEnableClientState(GL_VERTEX_ARRAY);
+        glVertexPointer(2, GL_FLOAT, 0, v.data());
+
+        // GL_LINES: 2頂点で1本
+        glDrawArrays(GL_LINES, 0, (GLsizei)(v.size() / 2));
+
+        glDisableClientState(GL_VERTEX_ARRAY);
         glPointSize(1.0);
         glBegin(GL_POINTS);
         for (int i = 0; i < 12 * 5; i++) {
@@ -171,7 +208,9 @@ class ClockGUI {
                 (double)m_wm->px((int)((size - (ani / 2)) * cos(M_PI / 2.0 + (M_PI * 2.0 * (double)i / (12.0 * 5.0))))),
                 (double)m_wm->py((int)((size - (ani / 2)) * sin(M_PI / 2.0 + (M_PI * 2.0 * (double)i / (12.0 * 5.0))))));
         }
+        
         glEnd();
+        
     }
 
     virtual void drawBackCircle() {
@@ -179,15 +218,40 @@ class ClockGUI {
     }
 
     virtual void drawBackCircle(int r, int g, int b) {
-        glBegin(GL_POLYGON);
-        glColor3ub(/* (int)backColorAni->play() */ r, g, b);
+        const int N = (int)CIRCLE_ACCURATE;
         m_wm->drawMode = CENTER;
+
         double ani = backAni->play();
-        for (int i = 0; i < CIRCLE_ACCURATE; i++) {
-            glVertex2i(m_wm->px(0 + ani * cos(2 * M_PI * i / CIRCLE_ACCURATE)), m_wm->py(0 + ani * sin(2 * M_PI * i / CIRCLE_ACCURATE)));
-        }
         backSize = ani;
-        glEnd();
+
+        // 頂点 (x,y) を float で詰める（WebGL系は float が相性良い）
+        std::vector<float> v;
+        v.reserve((N + 2) * 2);
+
+        // 中心
+        v.push_back((float)m_wm->px(0));
+        v.push_back((float)m_wm->py(0));
+
+        // 外周（最後に始点を重ねて閉じる）
+        for (int i = 0; i <= N; ++i) {
+            double t = 2.0 * M_PI * (double)i / (double)N;
+            double x = ani * std::cos(t);
+            double y = ani * std::sin(t);
+
+            v.push_back((float)m_wm->px(x));
+            v.push_back((float)m_wm->py(y));
+        }
+
+        // ---- ここから描画（glBegin/glEnd を使わない）----
+        glColor4ub((GLubyte)r, (GLubyte)g, (GLubyte)b, 255);
+
+        glEnableClientState(GL_VERTEX_ARRAY);
+        glVertexPointer(2, GL_FLOAT, 0, v.data());
+
+        const GLsizei count = (GLsizei)(v.size() / 2); // ★ここが必ず整数
+        glDrawArrays(GL_TRIANGLE_FAN, 0, count);
+
+        glDisableClientState(GL_VERTEX_ARRAY);
     }
 
     virtual void drawMinutesHand() {
@@ -254,7 +318,10 @@ class ClockGUI {
                 blockIndex += 1;
             }
         }
+        
+
         glEnd();
+        
     }
 };
 

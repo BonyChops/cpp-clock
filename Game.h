@@ -48,41 +48,104 @@ class Game {
     }
 
     void drawBack() {
-        glBegin(GL_POLYGON);
-        //rgb(250, 250, 0)
-        glColor3ub(250, 250, 250);
-        double ani = backAni->play();
-        double routateAni = backRoutateAni->play();
         m_wm->drawMode = CENTER;
-        for (int i = 0; i < 4; i++) {
-            glVertex2i(m_wm->px(0 + ani * cos(2 * M_PI * i / 4 + M_PI / 4 /* + routateAni */)), m_wm->py(0 + ani * sin(2 * M_PI * i / 4 + M_PI / 4 /* + routateAni */)));
-        }
-        glEnd();
-        squareActualSize = ani * cos(2 * M_PI * 4 / 4 + M_PI / 4 /* + routateAni */);
+
+        glColor3ub(250, 250, 250);
+
+        double ani = backAni->play();
+        double routateAni = backRoutateAni->play(); // 今はコメントされてたので同じ挙動にするなら使わない
+        (void)routateAni;
+
+        // 角度（元コードと同じ：45度オフセット）
+        // もし回転アニメを戻すなら + routateAni を足す
+        const double base = M_PI / 4.0 /* + routateAni */;
+
+        // 4頂点（px/py に double を渡して安定化）
+        double x0 = ani * std::cos(2.0 * M_PI * 0.0 / 4.0 + base);
+        double y0 = ani * std::sin(2.0 * M_PI * 0.0 / 4.0 + base);
+
+        double x1 = ani * std::cos(2.0 * M_PI * 1.0 / 4.0 + base);
+        double y1 = ani * std::sin(2.0 * M_PI * 1.0 / 4.0 + base);
+
+        double x2 = ani * std::cos(2.0 * M_PI * 2.0 / 4.0 + base);
+        double y2 = ani * std::sin(2.0 * M_PI * 2.0 / 4.0 + base);
+
+        double x3 = ani * std::cos(2.0 * M_PI * 3.0 / 4.0 + base);
+        double y3 = ani * std::sin(2.0 * M_PI * 3.0 / 4.0 + base);
+
+        // 2三角形: (0,1,2) と (0,2,3)
+        float v[12] = {
+            (float)m_wm->px(x0), (float)m_wm->py(y0),
+            (float)m_wm->px(x1), (float)m_wm->py(y1),
+            (float)m_wm->px(x2), (float)m_wm->py(y2),
+
+            (float)m_wm->px(x0), (float)m_wm->py(y0),
+            (float)m_wm->px(x2), (float)m_wm->py(y2),
+            (float)m_wm->px(x3), (float)m_wm->py(y3),
+        };
+
+        glEnableClientState(GL_VERTEX_ARRAY);
+        glVertexPointer(2, GL_FLOAT, 0, v);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+        glDisableClientState(GL_VERTEX_ARRAY);
+
+        // 元コードの計算をそのまま再現（※ i=4 は i=0 と同じ角度）
+        squareActualSize = ani * std::cos(2.0 * M_PI * 4.0 / 4.0 + base);
     }
 
     void drawBar() {
-        glBegin(GL_POINTS);
-        glColor3ub(barColorAni->play(), barColorAni->play(), 0.0);
-        glPointSize(5.0);
-        m_wm->drawLine(
-            (double)m_wm->px(bar_x - barWidth / 2),
-            m_wm->py(bar_y),
-            (double)m_wm->px(bar_x + barWidth / 2),
-            m_wm->py(bar_y));
-        glEnd();
+        // 色（barColorAni->play() は 0–255 を返す前提）
+        GLubyte c = (GLubyte)barColorAni->play();
+        glColor3ub(c, c, 0);
+
+        // 線の両端
+        float v[4] = {
+            (float)m_wm->px(bar_x - barWidth / 2.0),
+            (float)m_wm->py(bar_y),
+
+            (float)m_wm->px(bar_x + barWidth / 2.0),
+            (float)m_wm->py(bar_y)
+        };
+
+        glEnableClientState(GL_VERTEX_ARRAY);
+        glVertexPointer(2, GL_FLOAT, 0, v);
+
+        // 1本の線
+        glDrawArrays(GL_LINES, 0, 2);
+
+        glDisableClientState(GL_VERTEX_ARRAY);
     }
 
     void drawBall() {
         if (gameStarted) {
-            ball_x += cos(angle) * 5.0;
-            ball_y += sin(angle) * 5.0;
+            ball_x += std::cos(angle) * 5.0;
+            ball_y += std::sin(angle) * 5.0;
         }
-        glBegin(GL_POINTS);
-        glColor3ub(255.0, 0.0, 0.0);
-        glPointSize(10.0);
-        glVertex2i(m_wm->px((int)ball_x), m_wm->py((int)ball_y));
-        glEnd();
+
+        // 色
+        glColor3ub(255, 0, 0);
+
+        // 中心座標（int に潰さずそのまま）
+        double cx = m_wm->px(ball_x);
+        double cy = m_wm->py(ball_y);
+
+        const double half = 5.0; // pointSize 10 相当
+
+        // 四角形（2三角形）
+        float v[12] = {
+            (float)(cx - half), (float)(cy - half),
+            (float)(cx + half), (float)(cy - half),
+            (float)(cx + half), (float)(cy + half),
+
+            (float)(cx - half), (float)(cy - half),
+            (float)(cx + half), (float)(cy + half),
+            (float)(cx - half), (float)(cy + half),
+        };
+
+        glEnableClientState(GL_VERTEX_ARRAY);
+        glVertexPointer(2, GL_FLOAT, 0, v);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+        glDisableClientState(GL_VERTEX_ARRAY);
     }
 
     void checkWall() {

@@ -141,45 +141,65 @@ class FutureGUI : public ClockGUI {
         drawHand(width, r, g, b, an, per, time, timePer, 50);
     }
 
-    void drawHand(double width, int r, int g, int b, Animator* an, double per, double time, double timePer, double progress) {
-        /* glLineWidth(width);
-        glBegin(GL_LINES);
-        glColor3ub(r, g, b);
-        glVertex2i(m_wm->px(0), m_wm->py(0));
-        //glVertex2i(m_wm->px(size * 0.8), m_wm->py(0));
+    void drawHand(double width, int r, int g, int b,
+                Animator* an, double per, double time, double timePer, double progress)
+    {
+        // 色（点も線も同じ色）
+        glColor3ub((GLubyte)r, (GLubyte)g, (GLubyte)b);
 
+        // アニメーション値など
         double ani = an->play();
-        glVertex2i(m_wm->px(ani * per * cos(roundAniVal + (M_PI / 2.0) - (M_PI * 2.0 * time / timePer))),
-                   m_wm->py(ani * per * sin(roundAniVal + (M_PI / 2.0) - (M_PI * 2.0 * time / timePer)) * -1.0));
-        glEnd(); */
-        glPointSize(width / 25.0);
-        glBegin(GL_POINTS);
-        glColor3ub(r, g, b);
-        glVertex2i(m_wm->px(0), m_wm->py(0));
-        double ani = an->play();
-        ////cout << dayCycle.calcD(progress, 0.0, 100.0, 0, 50.0) << endl;
-        double startPos = progress < 50.0 ? dayCycle.calcD(progress, 0.0, 100.0, 0.0, 50.0) : 100.0;
-        double endPos = progress >= 50.0 ? dayCycle.calcD(progress, 0.0, 100.0, 50.0, 100.0) : 0.0;
-        m_wm->drawLine(
-            m_wm->px((ani * per * cos(roundAniVal * (timePer == 12.0 ? 1 : -1) + (M_PI / 2.0) - (M_PI * 2.0 * time / timePer))) * startPos / 100.0),
-            m_wm->py((ani * per * sin(roundAniVal * (timePer == 12.0 ? 1 : -1) + (M_PI / 2.0) - (M_PI * 2.0 * time / timePer)) * -1.0) * startPos / 100.0),
-            m_wm->px((ani * per * cos(roundAniVal * (timePer == 12.0 ? 1 : -1) + (M_PI / 2.0) - (M_PI * 2.0 * time / timePer))) * endPos / 100.0),
-            m_wm->py((ani * per * sin(roundAniVal * (timePer == 12.0 ? 1 : -1) + (M_PI / 2.0) - (M_PI * 2.0 * time / timePer)) * -1.0) * endPos / 100.0));
-        /* for (int i = 0; i < LINE_ACCURATE; i++) {
-            double bendVal = lineBending.play();
-            glVertex2i(m_wm->px((ani * per * cos(bendVal + roundAniVal * (timePer == 12.0 ? 1 : -1) + (M_PI / 2.0) - (M_PI * 2.0 * time / timePer))) * i / LINE_ACCURATE),
-                       m_wm->py((ani * per * sin(bendVal + roundAniVal * (timePer == 12.0 ? 1 : -1) + (M_PI / 2.0) - (M_PI * 2.0 * time / timePer)) * -1.0) * i / LINE_ACCURATE));
-        } */
-        /* if (generateBlocks) {
-            for (int i = 0; i < BLOCKS; i++) {
-                blocks[blockIndex] = new Block(
-                    m_wm->px((ani * per * cos(roundAniVal * (timePer == 12.0 ? 1 : -1) + (M_PI / 2.0) - (M_PI * 2.0 * time / timePer))) * i / BLOCKS),
-                    m_wm->py((ani * per * sin(roundAniVal * (timePer == 12.0 ? 1 : -1) + (M_PI / 2.0) - (M_PI * 2.0 * time / timePer)) * -1.0) * i / BLOCKS),
-                    r, g, b);
-                blockIndex += 1;
-            }
-        } */
-        glEnd();
+
+        double startPos = (progress < 50.0)
+            ? dayCycle.calcD(progress, 0.0, 100.0, 0.0, 50.0)
+            : 100.0;
+
+        double endPos = (progress >= 50.0)
+            ? dayCycle.calcD(progress, 0.0, 100.0, 50.0, 100.0)
+            : 0.0;
+
+        const double dir = (timePer == 12.0 ? 1.0 : -1.0);
+        const double ang = roundAniVal * dir + (M_PI / 2.0) - (2.0 * M_PI * time / timePer);
+
+        const double c = std::cos(ang);
+        const double s = std::sin(ang);
+
+        // 針の始点・終点（ワールド座標的なもの → px/pyへ）
+        const double xStart = (ani * per * c) * (startPos / 100.0);
+        const double yStart = (ani * per * s * -1.0) * (startPos / 100.0);
+
+        const double xEnd   = (ani * per * c) * (endPos / 100.0);
+        const double yEnd   = (ani * per * s * -1.0) * (endPos / 100.0);
+
+        // ---- 中心点（GL_POINTS）----
+        // WebGLだと point size が制約されることがありますが、これは glBegin 回避のため残しつつ
+        // 効かなければ「小さい四角を2三角形で描く」に置き換えるのが確実です。
+        glPointSize((GLfloat)(width / 25.0));
+
+        {
+            float p[2] = {
+                (float)m_wm->px(0),
+                (float)m_wm->py(0)
+            };
+
+            glEnableClientState(GL_VERTEX_ARRAY);
+            glVertexPointer(2, GL_FLOAT, 0, p);
+            glDrawArrays(GL_POINTS, 0, 1);
+            glDisableClientState(GL_VERTEX_ARRAY);
+        }
+
+        // ---- 針の線（GL_LINES）----
+        {
+            float v[4] = {
+                (float)m_wm->px(xStart), (float)m_wm->py(yStart),
+                (float)m_wm->px(xEnd),   (float)m_wm->py(yEnd)
+            };
+
+            glEnableClientState(GL_VERTEX_ARRAY);
+            glVertexPointer(2, GL_FLOAT, 0, v);
+            glDrawArrays(GL_LINES, 0, 2);
+            glDisableClientState(GL_VERTEX_ARRAY);
+        }
     }
 };
 

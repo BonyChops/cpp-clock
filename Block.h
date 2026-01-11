@@ -41,14 +41,31 @@ class Block {
     }
 
     void draw() {
-        glBegin(GL_QUADS);
+        glBegin(GL_TRIANGLES);
         glColor3ub(m_r, m_g, m_b);
+
         double size = sizeAni->play();
-        glVertex2i(m_x - size / 2, m_y - size / 2);
-        glVertex2i(m_x + size / 2, m_y - size / 2);
-        glVertex2i(m_x + size / 2, m_y + size / 2);
-        glVertex2i(m_x - size / 2, m_y + size / 2);
+        double half = size * 0.5;
+
+        // 四隅
+        double x0 = m_x - half;
+        double y0 = m_y - half;
+        double x1 = m_x + half;
+        double y1 = m_y + half;
+
+        // 1枚目: 左下 → 右下 → 右上
+        glVertex2i(x0, y0);
+        glVertex2i(x1, y0);
+        glVertex2i(x1, y1);
+
+        // 2枚目: 左下 → 右上 → 左上
+        glVertex2i(x0, y0);
+        glVertex2i(x1, y1);
+        glVertex2i(x0, y1);
+        
+
         glEnd();
+        
     }
 
     bool check(int x, int y) {
