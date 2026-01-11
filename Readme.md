@@ -3,6 +3,10 @@
 C++で実装されたシンプルな時計です．  
 ![時計](readmeImages/clock.png "時計")
 
+## Web 版
+
+https://bonychops.github.io/cpp-clock/
+
 ## 動作確認済環境
 
 - Cygwin 3.3.3
