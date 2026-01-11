@@ -22,9 +22,7 @@ jobs:
               uses: actions/checkout@v4
 
             - name: Setup Emscripten
-              uses: lovasoa/setup-emscripten@master
-              with:
-                  emscripten-version: "4.0.23"
+              uses: mymindstorm/setup-emsdk@v14
 
             - name: Configure (CMake via emcmake)
               run: |
